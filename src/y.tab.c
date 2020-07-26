@@ -15,7 +15,7 @@ char *rcs_luastx = "$Id: lua.stx,v 2.4 1994/04/20 16:22:21 celes Exp $";
 #include "table.h"
 #include "lua.h"
 
-#define LISTING 0
+#define LISTING 1
 
 #ifndef GAPCODE
 #define GAPCODE 50
@@ -42,6 +42,9 @@ static Word    fields[MAXFIELDS];     /* fieldnames to be flushed */
 static int     nfields=0;
 static int     ntemp;		     /* number of temporary var into stack */
 static int     err;		     /* flag to indicate error */
+
+// PrintCode
+static void PrintCode (Byte *code, Byte *end);
 
 /* Internal functions */
 
@@ -364,13 +367,13 @@ static void PrintCode (Byte *code, Byte *end)
  {
   switch ((OpCode)*p)
   {
-   case PUSHNIL:	printf ("%d    PUSHNIL\n", (p++)-code); break;
+   case PUSHNIL:	printf ("%-3d    PUSHNIL\n", (p++)-code); break;
    case PUSH0: case PUSH1: case PUSH2:
-    			printf ("%d    PUSH%c\n", p-code, *p-PUSH0+'0');
+    			printf ("%-3d    PUSH%c\n", p-code, *p-PUSH0+'0');
     			p++;
    			break;
    case PUSHBYTE:
-    			printf ("%d    PUSHBYTE   %d\n", p-code, *(++p));
+    			printf ("%-3d    PUSHBYTE   %d\n", p-code, *(++p));
     			p++;
    			break;
    case PUSHWORD:
@@ -379,7 +382,7 @@ static void PrintCode (Byte *code, Byte *end)
 			 int n = p-code;
 			 p++;
 			 get_word(c,p);
-    			 printf ("%d    PUSHWORD   %d\n", n, c.w);
+    			 printf ("%-3d    PUSHWORD   %d\n", n, c.w);
 			}
    			break;
    case PUSHFLOAT:
@@ -388,7 +391,7 @@ static void PrintCode (Byte *code, Byte *end)
 			 int n = p-code;
 			 p++;
 			 get_float(c,p);
-    			 printf ("%d    PUSHFLOAT  %f\n", n, c.f);
+    			 printf ("%-3d    PUSHFLOAT  %f\n", n, c.f);
 			}
    			break;
    case PUSHSTRING:
@@ -397,16 +400,16 @@ static void PrintCode (Byte *code, Byte *end)
 			 int n = p-code;
 			 p++;
 			 get_word(c,p);
-    			 printf ("%d    PUSHSTRING   %d\n", n, c.w);
+    			 printf ("%-3d    PUSHSTRING   %d\n", n, c.w);
 			}
    			break;
    case PUSHLOCAL0: case PUSHLOCAL1: case PUSHLOCAL2: case PUSHLOCAL3:
    case PUSHLOCAL4: case PUSHLOCAL5: case PUSHLOCAL6: case PUSHLOCAL7:
    case PUSHLOCAL8: case PUSHLOCAL9:
-    			printf ("%d    PUSHLOCAL%c\n", p-code, *p-PUSHLOCAL0+'0');
+    			printf ("%-3d    PUSHLOCAL%c\n", p-code, *p-PUSHLOCAL0+'0');
     			p++;
    			break;
-   case PUSHLOCAL:	printf ("%d    PUSHLOCAL   %d\n", p-code, *(++p));
+   case PUSHLOCAL:	printf ("%-3d    PUSHLOCAL   %d\n", p-code, *(++p));
     			p++;
    			break;
    case PUSHGLOBAL:
@@ -415,20 +418,20 @@ static void PrintCode (Byte *code, Byte *end)
 			 int n = p-code;
 			 p++;
 			 get_word(c,p);
-    			 printf ("%d    PUSHGLOBAL   %d\n", n, c.w);
+    			 printf ("%-3d    PUSHGLOBAL   %d\n", n, c.w);
 			}
    			break;
-   case PUSHINDEXED:    printf ("%d    PUSHINDEXED\n", (p++)-code); break;
-   case PUSHMARK:       printf ("%d    PUSHMARK\n", (p++)-code); break;
-   case PUSHOBJECT:     printf ("%d    PUSHOBJECT\n", (p++)-code); break;
+   case PUSHINDEXED:    printf ("%-3d    PUSHINDEXED\n", (p++)-code); break;
+   case PUSHMARK:       printf ("%-3d    PUSHMARK\n", (p++)-code); break;
+   case PUSHOBJECT:     printf ("%-3d    PUSHOBJECT\n", (p++)-code); break;
    case STORELOCAL0: case STORELOCAL1: case STORELOCAL2: case STORELOCAL3:
    case STORELOCAL4: case STORELOCAL5: case STORELOCAL6: case STORELOCAL7:
    case STORELOCAL8: case STORELOCAL9:
-    			printf ("%d    STORELOCAL%c\n", p-code, *p-STORELOCAL0+'0');
+    			printf ("%-3d    STORELOCAL%c\n", p-code, *p-STORELOCAL0+'0');
     			p++;
    			break;
    case STORELOCAL:
-    			printf ("%d    STORELOCAL   %d\n", p-code, *(++p));
+    			printf ("%-3d    STORELOCAL   %d\n", p-code, *(++p));
     			p++;
    			break;
    case STOREGLOBAL:
@@ -437,11 +440,11 @@ static void PrintCode (Byte *code, Byte *end)
 			 int n = p-code;
 			 p++;
 			 get_word(c,p);
-    			 printf ("%d    STOREGLOBAL   %d\n", n, c.w);
+    			 printf ("%-3d    STOREGLOBAL   %d\n", n, c.w);
 			}
    			break;
-   case STOREINDEXED0:  printf ("%d    STOREINDEXED0\n", (p++)-code); break;
-   case STOREINDEXED:   printf ("%d    STOREINDEXED   %d\n", p-code, *(++p));
+   case STOREINDEXED0:  printf ("%-3d    STOREINDEXED0\n", (p++)-code); break;
+   case STOREINDEXED:   printf ("%-3d    STOREINDEXED   %d\n", p-code, *(++p));
     			p++;
    			break;
    case STORELIST0:
@@ -457,27 +460,27 @@ static void PrintCode (Byte *code, Byte *end)
        p += *p*sizeof(Word) + 1;
        break;
    case ADJUST:
-    			printf ("%d    ADJUST   %d\n", p-code, *(++p));
+    			printf ("%-3d    ADJUST   %d\n", p-code, *(++p));
     			p++;
    			break;
-   case CREATEARRAY:	printf ("%d    CREATEARRAY\n", (p++)-code); break;
-   case EQOP:       	printf ("%d    EQOP\n", (p++)-code); break;
-   case LTOP:       	printf ("%d    LTOP\n", (p++)-code); break;
-   case LEOP:       	printf ("%d    LEOP\n", (p++)-code); break;
-   case ADDOP:       	printf ("%d    ADDOP\n", (p++)-code); break;
-   case SUBOP:       	printf ("%d    SUBOP\n", (p++)-code); break;
-   case MULTOP:      	printf ("%d    MULTOP\n", (p++)-code); break;
-   case DIVOP:       	printf ("%d    DIVOP\n", (p++)-code); break;
-   case CONCOP:       	printf ("%d    CONCOP\n", (p++)-code); break;
-   case MINUSOP:       	printf ("%d    MINUSOP\n", (p++)-code); break;
-   case NOTOP:       	printf ("%d    NOTOP\n", (p++)-code); break;
+   case CREATEARRAY:	printf ("%-3d    CREATEARRAY\n", (p++)-code); break;
+   case EQOP:       	printf ("%-3d    EQOP\n", (p++)-code); break;
+   case LTOP:       	printf ("%-3d    LTOP\n", (p++)-code); break;
+   case LEOP:       	printf ("%-3d    LEOP\n", (p++)-code); break;
+   case ADDOP:       	printf ("%-3d    ADDOP\n", (p++)-code); break;
+   case SUBOP:       	printf ("%-3d    SUBOP\n", (p++)-code); break;
+   case MULTOP:      	printf ("%-3d    MULTOP\n", (p++)-code); break;
+   case DIVOP:       	printf ("%-3d    DIVOP\n", (p++)-code); break;
+   case CONCOP:       	printf ("%-3d    CONCOP\n", (p++)-code); break;
+   case MINUSOP:       	printf ("%-3d    MINUSOP\n", (p++)-code); break;
+   case NOTOP:       	printf ("%-3d    NOTOP\n", (p++)-code); break;
    case ONTJMP:	   
     			{
 			 CodeWord c;
 			 int n = p-code;
 			 p++;
 			 get_word(c,p);
-    			 printf ("%d    ONTJMP  %d\n", n, c.w);
+    			 printf ("%-3d    ONTJMP  %d\n", n, c.w);
 			}
    			break;
    case ONFJMP:	   
@@ -486,7 +489,7 @@ static void PrintCode (Byte *code, Byte *end)
 			 int n = p-code;
 			 p++;
 			 get_word(c,p);
-    			 printf ("%d    ONFJMP  %d\n", n, c.w);
+    			 printf ("%-3d    ONFJMP  %d\n", n, c.w);
 			}
    			break;
    case JMP:	   
@@ -495,7 +498,7 @@ static void PrintCode (Byte *code, Byte *end)
 			 int n = p-code;
 			 p++;
 			 get_word(c,p);
-    			 printf ("%d    JMP  %d\n", n, c.w);
+    			 printf ("%-3d    JMP  %d\n", n, c.w);
 			}
    			break;
    case UPJMP:
@@ -504,7 +507,7 @@ static void PrintCode (Byte *code, Byte *end)
 			 int n = p-code;
 			 p++;
 			 get_word(c,p);
-    			 printf ("%d    UPJMP  %d\n", n, c.w);
+    			 printf ("%-3d    UPJMP  %d\n", n, c.w);
 			}
    			break;
    case IFFJMP:
@@ -513,7 +516,7 @@ static void PrintCode (Byte *code, Byte *end)
 			 int n = p-code;
 			 p++;
 			 get_word(c,p);
-    			 printf ("%d    IFFJMP  %d\n", n, c.w);
+    			 printf ("%-3d    IFFJMP  %d\n", n, c.w);
 			}
    			break;
    case IFFUPJMP:
@@ -522,16 +525,16 @@ static void PrintCode (Byte *code, Byte *end)
 			 int n = p-code;
 			 p++;
 			 get_word(c,p);
-    			 printf ("%d    IFFUPJMP  %d\n", n, c.w);
+    			 printf ("%-3d    IFFUPJMP  %d\n", n, c.w);
 			}
    			break;
-   case POP:       	printf ("%d    POP\n", (p++)-code); break;
-   case CALLFUNC:	printf ("%d    CALLFUNC\n", (p++)-code); break;
+   case POP:       	printf ("%-3d    POP\n", (p++)-code); break;
+   case CALLFUNC:	printf ("%-3d    CALLFUNC\n", (p++)-code); break;
    case RETCODE:
-    			printf ("%d    RETCODE   %d\n", p-code, *(++p));
+    			printf ("%-3d    RETCODE   %d\n", p-code, *(++p));
     			p++;
    			break;
-   case HALT:		printf ("%d    HALT\n", (p++)-code); break;
+   case HALT:		printf ("%-3d    HALT\n", (p++)-code); break;
    case SETFUNCTION:
                         {
                          CodeWord c1, c2;
@@ -539,7 +542,7 @@ static void PrintCode (Byte *code, Byte *end)
                          p++;
                          get_word(c1,p);
                          get_word(c2,p);
-                         printf ("%d    SETFUNCTION  %d  %d\n", n, c1.w, c2.w);
+                         printf ("%-3d    SETFUNCTION  %d  %d\n", n, c1.w, c2.w);
                         }
                         break;
    case SETLINE:
@@ -548,12 +551,12 @@ static void PrintCode (Byte *code, Byte *end)
                          int n = p-code;
                          p++;
                          get_word(c,p);
-                         printf ("%d    SETLINE  %d\n", n, c.w);
+                         printf ("%-3d    SETLINE  %d\n", n, c.w);
                         }
                         break;
 
-   case RESET:		printf ("%d    RESET\n", (p++)-code); break;
-   default:		printf ("%d    Cannot happen: code %d\n", (p++)-code, *(p-1)); break;
+   case RESET:		printf ("%-3d    RESET\n", (p++)-code); break;
+   default:		printf ("%-3d    Cannot happen: code %d\n", (p++)-code, *(p-1)); break;
   }
  }
 }
