@@ -11,7 +11,7 @@ OBJS= lua.o
 T=$(BIN)/lua
 
 $T: $(OBJS)
-	$(CC) -o $@ $(OBJS) -L$(LIB) -llua -llualib -lm
+	$(CC) -o $@ $(OBJS) -L$(LIB) -llua -llualib -lm -lreadline
 
 clean:
 	rm -f $T $(OBJS)
