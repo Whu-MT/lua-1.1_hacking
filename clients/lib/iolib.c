@@ -471,6 +471,7 @@ void io_remove  (void)
 */
 void iolib_open (void)
 {
+ in=stdin, out=stdout;
  lua_register ("readfrom", io_readfrom);
  lua_register ("writeto",  io_writeto);
  lua_register ("appendto", io_appendto);

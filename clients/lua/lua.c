@@ -22,7 +22,7 @@ int main (int argc, char *argv[])
  if (argc < 2)
  {
    char *buffer;
-   while (NULL != (buffer = readline(">")))
+   while (NULL != (buffer = readline("> ")))
    {
      lua_dostring(buffer);
      add_history(buffer);
